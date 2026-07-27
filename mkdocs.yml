@@ -8,6 +8,7 @@ theme:
 nav:
   - Overview: index.md
   - Rulesets: rulesets.md
+  - Tablebases: tablebases.md
   - API Reference: api.md
 
 plugins:
