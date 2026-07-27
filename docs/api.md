@@ -4,15 +4,17 @@
 
 ::: clatsop.ruleset.Turn
 
-::: clatsop.ruleset.Conditions
-
-::: clatsop.ruleset.Effects
-
 ::: clatsop.ruleset.Rule
 
 ::: clatsop.ruleset.Transition
 
 ::: clatsop.ruleset.Ruleset
+
+::: clatsop.ruleset.pack_state
+
+::: clatsop.ruleset.unpack_state
+
+::: clatsop.ruleset.quiet_ply
 
 ::: clatsop.encoding
 

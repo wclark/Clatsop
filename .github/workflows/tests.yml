@@ -13,12 +13,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
-          python-version: "3.13"
+          python-version: "3.14"
 
       - name: Install package
         run: python -m pip install -e ".[dev]"
@@ -32,20 +32,20 @@ jobs:
       - name: Format check
         run: ruff format --check src tests benchmarks
 
-      - name: Build package
-        run: python -m build
+      - name: Type check
+        run: pyright
 
   test:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.10", "3.11", "3.12", "3.13"]
+        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -55,22 +55,66 @@ jobs:
       - name: Run tests with coverage
         run: pytest --cov=clatsop --cov-report=term-missing
 
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.14"
+
+      - name: Install package
+        run: python -m pip install -e ".[test]"
+
+      - name: Run tests
+        env:
+          MPLBACKEND: Agg
+        run: pytest
+
+  wheel:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
+        with:
+          python-version: "3.14"
+
+      - name: Build wheel and source distribution
+        run: |
+          python -m pip install build
+          python -m build
+
+      - name: Install and smoke-test the wheel
+        run: |
+          python -m pip install --force-reinstall dist/*.whl
+          cd /tmp
+          python -c "from clatsop import Ruleset, Turn; assert len(Ruleset.american()) == 366; assert len(Ruleset.american().successors(Turn.initial())) == 7"
+          python -m pip check
+
   notebook:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7
         with:
-          python-version: "3.13"
+          python-version: "3.14"
 
       - name: Install notebook dependencies
         run: python -m pip install -e ".[notebook]"
 
-      - name: Execute the rule catalog
+      - name: Execute notebooks
         env:
           MPLBACKEND: Agg
         run: |
           mkdir -p .notebook-build
-          jupyter nbconvert --execute --to notebook --ExecutePreprocessor.timeout=600 --output-dir=.notebook-build notebooks/clatsop_rule_catalog.ipynb
+          jupyter nbconvert --execute --to notebook --ExecutePreprocessor.timeout=600 --output-dir=.notebook-build notebooks/clatsop_examples.ipynb notebooks/clatsop_rule_catalog.ipynb
+
+      - name: Upload executed notebooks
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: executed-notebooks
+          path: .notebook-build/

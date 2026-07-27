@@ -1,10 +1,17 @@
 """Notebook-friendly visualization helpers for native 32-bit boards and rules."""
 
+from typing import Any
+
 from .encoding import MASK32, is_playable_square, square_mask32
 from .ruleset import Rule, Ruleset, Turn, as_board, as_turn
 
 
-def show_board(board, size=3, title=None, show=True):
+def show_board(
+    board: object,
+    size: float = 3,
+    title: str | None = None,
+    show: bool = True,
+) -> tuple[Any, Any]:
     """Render a board or turn."""
 
     import matplotlib.pyplot as plt
@@ -23,13 +30,24 @@ def show_board(board, size=3, title=None, show=True):
     return fig, ax
 
 
-def show_turn(turn, size=3, title=None, show=True):
+def show_turn(
+    turn: object,
+    size: float = 3,
+    title: str | None = None,
+    show: bool = True,
+) -> tuple[Any, Any]:
     """Render a turn."""
 
     return show_board(as_turn(turn), size=size, title=title, show=show)
 
 
-def show_ruleset_rows(ruleset, rules=None, size=3.2, title=None, show=True):
+def show_ruleset_rows(
+    ruleset: object,
+    rules: object | None = None,
+    size: float = 3.2,
+    title: str | None = None,
+    show: bool = True,
+) -> list[tuple[Any, Any]]:
     """Render selected rules as separate condition/effect/summary rows."""
 
     rows = _rule_records(ruleset, rules)
@@ -46,7 +64,12 @@ def show_ruleset_rows(ruleset, rules=None, size=3.2, title=None, show=True):
     return figures
 
 
-def draw_board(ax, board, title=None, dots=0):
+def draw_board(
+    ax: Any,
+    board: object,
+    title: str | None = None,
+    dots: object = 0,
+) -> Any:
     """Draw a 32-bit board on an existing matplotlib axis."""
 
     board = as_board(board)
@@ -102,18 +125,17 @@ def _draw_conditions_board(ax, rule):
 
 def _draw_effects_board(ax, rule):
     _draw_base_board(ax)
-    _draw_mask_markers(ax, rule["be_empty"], "empty")
-    _draw_mask_markers(ax, rule["be_white"], "white")
-    _draw_mask_markers(ax, rule["be_black"], "black")
+    _draw_mask_markers(ax, int(rule["is_black"]) | int(rule["is_white"]), "empty")
+    _draw_mask_markers(ax, rule["is_empty"], _side_label(rule))
     if rule["king"] or rule["promotion"]:
-        _draw_mask_markers(ax, _mover_effect_mask(rule), "king_overlay")
+        _draw_mask_markers(ax, rule["is_empty"], "king_overlay")
 
 
 def _draw_rule_info(ax, rule):
     ax.axis("off")
     lines = [
         f"side: {_side_label(rule)}",
-        f"king: {int(rule['king'])}",
+        f"king required: {int(rule['king'])}",
         f"capture: {int(rule['capture'])}",
         f"promotion: {int(rule['promotion'])}",
     ]
@@ -213,7 +235,7 @@ def _rule_records(ruleset, rules):
 
     rows = []
     for index, rule in enumerate(selected):
-        record = rule.as_dict if isinstance(rule, Rule) else dict(rule)
+        record = rule.as_dict() if isinstance(rule, Rule) else dict(rule)
         record.setdefault("rule_index", index)
         rows.append(record)
     return rows
@@ -226,10 +248,6 @@ def _rule_row_title(rule, title=None):
 
 def _mover_condition_mask(rule):
     return rule["is_black"] if int(rule["black_to_move"]) else rule["is_white"]
-
-
-def _mover_effect_mask(rule):
-    return rule["be_black"] if int(rule["black_to_move"]) else rule["be_white"]
 
 
 def _side_label(rule):

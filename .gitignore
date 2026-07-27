@@ -8,6 +8,8 @@ coverage.xml
 htmlcov/
 .mypy_cache/
 .ruff_cache/
+.hypothesis/
+.notebook-build/
 build/
 dist/
 site/

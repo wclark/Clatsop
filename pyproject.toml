@@ -46,6 +46,7 @@ docs = [
 ]
 test = [
   "coverage[toml]>=7",
+  "hypothesis>=6.100",
   "matplotlib>=3.7",
   "nbclient>=0.10",
   "nbformat>=5",
@@ -56,6 +57,7 @@ test = [
 dev = [
   "build>=1",
   "coverage[toml]>=7",
+  "hypothesis>=6.100",
   "matplotlib>=3.7",
   "mkdocs>=1.6",
   "mkdocstrings[python]>=0.27",
@@ -64,6 +66,7 @@ dev = [
   "pandas>=2.0",
   "pytest>=8",
   "pytest-cov>=5",
+  "pyright>=1.1.390",
   "ruff>=0.8",
 ]
 
@@ -99,3 +102,9 @@ select = [
   "SIM",
   "UP",
 ]
+
+[tool.pyright]
+include = ["src"]
+pythonVersion = "3.10"
+typeCheckingMode = "basic"
+reportMissingImports = false
